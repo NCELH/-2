@@ -1,0 +1,126 @@
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Windows.Forms;
+using System.Collections;
+using System.IO;
+
+namespace chuti
+{
+    public partial class Form1 : Form
+    {        
+        public bool panduan(int shu)
+        {
+            if (shu == 0)
+            {
+                MessageBox.Show("请至少选用一种运算符号");
+                return true;
+            }
+            else return false;
+        }
+        public int fuhao(ArrayList arr)
+        {
+            int shu = arr.Count;
+            if (checkBox1.CheckState != CheckState.Checked)
+            {
+                shu--;
+                arr.Remove("+");
+            }
+            if (checkBox2.CheckState != CheckState.Checked)
+            {
+                shu--;
+                arr.Remove("-");
+            }
+            if (checkBox3.CheckState != CheckState.Checked)
+            {
+                shu--;
+                arr.Remove("*");
+            }
+            if (checkBox4.CheckState != CheckState.Checked)
+            {
+                shu--;
+                arr.Remove("/");
+                if (panduan(shu)) { shu = 1; arr.Add("÷"); checkBox4.CheckState = CheckState.Checked; }
+            }
+            return shu;
+        }
+        public string xiaoshu(Random ran, int numMax, ArrayList arr,int rollFu,int rollFu2)
+        {
+            string a;
+            int shu1 = ran.Next(1, numMax * 10);
+            int shu2 = ran.Next(1, numMax * 10);
+            int shu3 = ran.Next(1, numMax * 10);
+            float temp1 = (float)(shu1 * 0.1);
+            float temp2 = (float)(shu2 * 0.1);
+            float temp3 = (float)(shu3 * 0.1);
+            if (checkBox5.CheckState == CheckState.Checked)
+            {
+                a = temp1.ToString() + arr[rollFu] + "(" + temp2.ToString() + arr[rollFu2] + temp3.ToString() + ")";
+            }
+            else a = temp1.ToString() + arr[rollFu] + temp2.ToString();
+            return a;
+        }
+
+       public void chanSheng(int timuMax,int numMax)
+        {
+            ArrayList arr = new ArrayList() { "+", "-", "*", "/" };//{ "＋", "－", "×", "÷" };
+            string a;
+            Random ran = new Random();
+            int b = fuhao(arr);       
+            for (int i = 0; i < timuMax; i++)
+            {
+                
+                int rollFu = ran.Next(0, b);
+                int rollFu2 = ran.Next(0, b);
+                if(checkBox6.CheckState==CheckState.Checked)
+                {
+                    a=xiaoshu(ran,numMax,arr,rollFu,rollFu2);                   
+                }
+                else
+                {
+                    int shu1 = ran.Next(1, numMax);
+                    int shu2 = ran.Next(1, numMax);
+                    int shu3 = ran.Next(1, numMax);
+                    if (checkBox5.CheckState == CheckState.Checked)
+                    {
+                        a = shu1.ToString() + arr[rollFu] +"("+ shu2.ToString() + arr[rollFu2] + shu3.ToString()+")";
+                    }
+                    else a = shu1.ToString() + arr[rollFu] + shu2.ToString();
+                }
+                var aout = new System.Data.DataTable().Compute(a, "");
+                double c = Convert.ToDouble(aout);
+                aout=Math.Round(c, 2);
+                textBox1.Text += a + "="+aout.ToString()+"\r\n";
+            }
+        }
+        public Form1()
+        {
+            InitializeComponent();            
+        }
+        private void button1_Click(object sender, EventArgs e)
+        {
+            textBox1.Text = "";
+            textBox1.Font = new Font("宋体", 20);
+            int timuMax = Convert.ToInt32(textBox2.Text);
+            int numMax = Convert.ToInt32(textBox3.Text);
+            chanSheng(timuMax,numMax);           
+        }
+        private void button2_Click(object sender, EventArgs e)
+        {
+            if (this.folderBrowserDialog1.ShowDialog() == DialogResult.OK)
+            {
+                string path = this.folderBrowserDialog1.SelectedPath + @"\题目.txt";
+
+                using (StreamWriter writer = new StreamWriter(path))
+                {
+                    writer.Write(this.textBox1.Text);
+                }
+                MessageBox.Show("写入成功");
+            }
+        }
+    }
+}
